@@ -1,0 +1,37 @@
+version: '2.22'
+services:
+  gzctf:
+    image: gztime/gzctf:latest
+    restart: always
+    environment:
+      - "GZCTF_ADMIN_PASSWORD=20040102wsy" # <String3>换成管理员账户密码，账号为Admin
+    ports:
+      - "80:80" # 对外端口号，前为外部端口。
+    networks:
+      default:
+    volumes:
+      - "./data/files:/app/uploads"
+      - "./appsettings.json:/app/appsettings.json:ro"
+      - "./logs:/app/log"
+      - "./data/keys:/root/.aspnet/DataProtection-Keys"
+      # - "./k8sconfig.yaml:/app/k8sconfig.yaml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - "POSTGRES_PASSWORD=<String1>" # 数据库密码，务必要和appsettings.json中的配置一致
+    networks:
+      default:
+    volumes:
+      - "./data/db:/var/lib/postgresql/data"
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.12.0/24
